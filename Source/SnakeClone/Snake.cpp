@@ -3,12 +3,18 @@
 
 #include "Snake.h"
 #include "Components/InputComponent.h"
+#include "SnakeMovementComponent.h"
 
 // Sets default values
 ASnake::ASnake()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	MovementComponent = CreateDefaultSubobject<USnakeMovementComponent>(TEXT("MovementComponent"));
+	MovementComponent->UpdatedComponent = RootComponent;
+
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
 // Called when the game starts or when spawned
@@ -22,9 +28,15 @@ void ASnake::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector currentLocation = GetActorLocation();
-	currentLocation += currentVelocity;
-	SetActorLocation(currentLocation);
+	if (MovementComponent && MovementComponent->UpdatedComponent == RootComponent)
+	{
+		MovementComponent->AddInputVector(MovementDirection);
+	}
+}
+
+UPawnMovementComponent* ASnake::GetMovementComponent() const
+{
+	return MovementComponent;
 }
 
 // Called to bind functionality to input
@@ -42,24 +54,20 @@ void ASnake::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ASnake::MoveUp()
 {
-	UE_LOG(LogTemp, Display, TEXT("MoveUp"));
-	currentVelocity = FVector(1.f, 0.f, 0.f);
+	MovementDirection = FVector(1.f, 0.f, 0.f);
 }
 
 void ASnake::MoveDown()
 {
-	UE_LOG(LogTemp, Display, TEXT("MoveDown"));
-	currentVelocity = FVector(-1.f, 0.f, 0.f);
+	MovementDirection = FVector(-1.f, 0.f, 0.f);
 }
 
 void ASnake::MoveLeft()
 {
-	UE_LOG(LogTemp, Display, TEXT("MoveLeft"));
-	currentVelocity = FVector(0.f, -1.f, 0.f);
+	MovementDirection = FVector(0.f, -1.f, 0.f);
 }
 
 void ASnake::MoveRight()
 {
-	UE_LOG(LogTemp, Display, TEXT("MoveRight"));
-	currentVelocity = FVector(0.f, 1.f, 0.f);
+	MovementDirection = FVector(0.f, 1.f, 0.f);
 }
