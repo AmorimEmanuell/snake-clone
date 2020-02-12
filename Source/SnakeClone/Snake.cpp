@@ -3,6 +3,7 @@
 
 #include "Snake.h"
 #include "Components/InputComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "SnakeMovementComponent.h"
 
 // Sets default values
@@ -10,6 +11,11 @@ ASnake::ASnake()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	Tags.Add(TEXT("SnakeHead"));
+
+	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Head"));
+	StaticMesh->SetCollisionProfileName(TEXT("Pawn"));
+	RootComponent = StaticMesh;
 
 	MovementComponent = CreateDefaultSubobject<USnakeMovementComponent>(TEXT("MovementComponent"));
 	MovementComponent->UpdatedComponent = RootComponent;
@@ -28,7 +34,7 @@ void ASnake::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (MovementComponent && MovementComponent->UpdatedComponent == RootComponent)
+	if (MovementComponent)
 	{
 		MovementComponent->AddInputVector(MovementDirection);
 	}

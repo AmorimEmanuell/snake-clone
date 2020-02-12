@@ -11,11 +11,13 @@ class SNAKECLONE_API ASnake : public APawn
 {
 	GENERATED_BODY()
 
-public:
-	UPROPERTY(VisibleAnywhere)
+private:
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	class USnakeMovementComponent* MovementComponent;
 
-private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly, meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* StaticMesh;
+
 	FVector MovementDirection = FVector(0.f);
 
 public:

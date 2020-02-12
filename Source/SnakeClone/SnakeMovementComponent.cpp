@@ -17,10 +17,5 @@ void USnakeMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tic
     {
         FHitResult Hit;
         SafeMoveUpdatedComponent(DesiredMovementThisFrame, UpdatedComponent->GetComponentRotation(), true, Hit);
-
-        if (Hit.IsValidBlockingHit())
-        {
-            SlideAlongSurface(DesiredMovementThisFrame, 1.f - Hit.Time, Hit.Normal, Hit);
-        }
     }
 }
