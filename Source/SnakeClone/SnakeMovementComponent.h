@@ -28,4 +28,7 @@ public:
 
 public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFuntion) override;
+
+private:
+	bool InputVectorIsInOppositeDirection(FVector InputVector);
 };

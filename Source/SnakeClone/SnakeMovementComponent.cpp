@@ -13,6 +13,10 @@ void USnakeMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tic
 	}
 
 	FVector InputVector = ConsumeInputVector();
+	if (InputVectorIsInOppositeDirection(InputVector))
+	{
+		InputVector = LastInputVector;
+	}
 
 	if (LastInputVector != InputVector)
 	{
@@ -25,10 +29,14 @@ void USnakeMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tic
 
 	FRotator FinalRotation = InputVector.Rotation();
 	float RotationProgress = FMath::Clamp(ElapsedRotationTime / TotalRotationTime, 0.f, 1.f);
-	UE_LOG(LogTemp, Display, TEXT("ElapsedRotationTime %f TotalRotationTime %f RotationProgress %f"), ElapsedRotationTime, TotalRotationTime, RotationProgress);
 	ElapsedRotationTime += DeltaTime;
 	FRotator DesiredRotationThisFrame = FMath::Lerp(InitialRotation, FinalRotation, RotationProgress);
 
 	FHitResult Hit;
 	SafeMoveUpdatedComponent(DesiredMovementThisFrame, DesiredRotationThisFrame, true, Hit);
+}
+
+bool USnakeMovementComponent::InputVectorIsInOppositeDirection(FVector InputVector)
+{
+	return FVector::DotProduct(InputVector, LastInputVector) == -1.f;
 }
