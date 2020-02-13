@@ -7,17 +7,25 @@
 #include "SnakeMovementComponent.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class SNAKECLONE_API USnakeMovementComponent : public UPawnMovementComponent
 {
 	GENERATED_BODY()
 
-public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float Speed = 200.f;
+private:
+	FVector LastInputVector = FVector(0.f);
+	FRotator InitialRotation = FRotator(0.f);
+	float ElapsedRotationTime = 0.f;
 
 public:
-    virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFuntion) override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TotalRotationTime = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Speed = 200.f;
+
+public:
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFuntion) override;
 };
