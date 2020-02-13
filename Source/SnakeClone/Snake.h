@@ -12,10 +12,10 @@ class SNAKECLONE_API ASnake : public APawn
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class USnakeMovementComponent* MovementComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* StaticMesh;
 
 	FVector MovementDirection = FVector(0.f);
