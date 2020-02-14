@@ -19,6 +19,9 @@ private:
 	TSubclassOf<class AFloorTile> FloorTile;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
+	TSubclassOf<class ASnake> Player;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
 	float Spacing;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))

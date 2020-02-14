@@ -3,6 +3,7 @@
 
 #include "LevelCreator.h"
 #include "FloorTile.h"
+#include "Snake.h"
 #include "Engine/World.h"
 
 // Sets default values
@@ -11,12 +12,12 @@ ALevelCreator::ALevelCreator()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	LevelLayoutInfo.Add(TEXT("w,w,w,w,w,w,w,w,w,w,w,w"));
-	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,s,_,_,_,_,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,w,w,w,w,w,w,w,w,w,w,w"));
+	LevelLayoutInfo.Add(TEXT("w,w,w,w,w,w,w,w,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,s,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,w,w,w,w,w,w,w,w"));
 }
 
 // Called when the game starts or when spawned
@@ -38,9 +39,6 @@ void ALevelCreator::BeginPlay()
 	}
 
 	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = GetInstigator();
-
 	FVector TileLocation = FVector(0.f);
 	FRotator TileRotation = FRotator(0.f);
 
@@ -48,28 +46,28 @@ void ALevelCreator::BeginPlay()
 	{
 		SpawnedRows.Add(FLevelRowStruct());
 
-		FString line = LevelLayoutInfo[i];
-		TArray<FString> TileInfo;
-		line.ParseIntoArray(TileInfo, TEXT(","), true);
+		TArray<FString> RowLayoutInfo;
+		LevelLayoutInfo[i].ParseIntoArray(RowLayoutInfo, TEXT(","), true);
 
 		TileLocation.X = (LevelLayoutInfo.Num() - 1 - i) * Spacing;
 
-		for (int j = 0; j < TileInfo.Num(); j++)
+		for (int j = 0; j < RowLayoutInfo.Num(); j++)
 		{
 			TileLocation.Y = j * Spacing;
 			AFloorTile* SpawnedTile = World->SpawnActor<AFloorTile>(FloorTile, TileLocation, TileRotation, SpawnParams);
-
-			FString ReadInfoChar = TileInfo[j];
-			ReadInfoChar.TrimStartAndEndInline();
-			if (LevelPiece.Contains(ReadInfoChar))
-			{
-				FVector PieceLocation = TileLocation;
-				PieceLocation.Z += HeightOffset;
-				TSubclassOf<ALevelPiece> LevelPieceToSpawn = LevelPiece[ReadInfoChar];
-				World->SpawnActor<ALevelPiece>(LevelPieceToSpawn, PieceLocation, TileRotation, SpawnParams);
-			}
-
 			SpawnedRows[i].Columns.Add(SpawnedTile);
+
+			FString LayoutInfoChar = RowLayoutInfo[j];
+			LayoutInfoChar.TrimStartAndEndInline();
+			if (LevelPiece.Contains(LayoutInfoChar))
+			{
+				TSubclassOf<ALevelPiece> PieceToSpawn = LevelPiece[LayoutInfoChar];
+				World->SpawnActor<ALevelPiece>(PieceToSpawn, TileLocation, TileRotation, SpawnParams);
+			}
+			else if (LayoutInfoChar.Equals(TEXT("s")))
+			{
+				World->SpawnActor<ASnake>(Player, TileLocation, TileRotation, SpawnParams);
+			}
 		}
 	}
 }
