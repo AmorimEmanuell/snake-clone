@@ -21,8 +21,12 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
 	float Spacing;
 
-	//Just for testing
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
+	float HeightOffset;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
 	TArray<FString> LevelLayoutInfo;
+
 	TArray<FLevelRowStruct> SpawnedRows;
 
 public:
@@ -41,8 +45,4 @@ struct FLevelRowStruct
 
 	UPROPERTY()
 	TArray<AFloorTile*> Columns;
-
-	FLevelRowStruct()
-	{
-	}
 };
