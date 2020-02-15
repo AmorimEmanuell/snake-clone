@@ -4,7 +4,8 @@
 #include "Snake.h"
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "SnakeMovementComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "TimerManager.h"
 
 // Sets default values
 ASnake::ASnake()
@@ -16,11 +17,6 @@ ASnake::ASnake()
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Head"));
 	StaticMesh->SetCollisionProfileName(TEXT("Pawn"));
 	RootComponent = StaticMesh;
-
-	MovementComponent = CreateDefaultSubobject<USnakeMovementComponent>(TEXT("MovementComponent"));
-	MovementComponent->UpdatedComponent = RootComponent;
-
-	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
 // Called when the game starts or when spawned
@@ -34,15 +30,26 @@ void ASnake::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (MovementComponent)
+	if (CurrentDirection.IsZero())
 	{
-		MovementComponent->AddInputVector(MovementDirection);
+		return;
 	}
-}
 
-UPawnMovementComponent* ASnake::GetMovementComponent() const
-{
-	return MovementComponent;
+	if (ElapsedRotationTime < HeadRotationDuration)
+	{
+		ElapsedRotationTime += DeltaTime;
+
+		float RotationProgress = ElapsedRotationTime / HeadRotationDuration;
+		FRotator DesiredRotationThisFrame = FMath::Lerp(HeadStartRotation, HeadEndRotation, RotationProgress);
+		SetActorRotation(DesiredRotationThisFrame);
+	}
+
+	FHitResult Hit;
+	AddActorWorldOffset(CurrentDirection * DeltaTime * Speed, true, &Hit);
+	if (Hit.IsValidBlockingHit())
+	{
+		UE_LOG(LogTemp, Display, TEXT("%s"), *Hit.GetActor()->GetName());
+	}
 }
 
 // Called to bind functionality to input
@@ -60,20 +67,61 @@ void ASnake::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ASnake::MoveUp()
 {
-	MovementDirection = FVector(1.f, 0.f, 0.f);
+	ChangeDirection(FVector(1.f, 0.f, 0.f));
 }
 
 void ASnake::MoveDown()
 {
-	MovementDirection = FVector(-1.f, 0.f, 0.f);
+	ChangeDirection(FVector(-1.f, 0.f, 0.f));
 }
 
 void ASnake::MoveLeft()
 {
-	MovementDirection = FVector(0.f, -1.f, 0.f);
+	ChangeDirection(FVector(0.f, -1.f, 0.f));
 }
 
 void ASnake::MoveRight()
 {
-	MovementDirection = FVector(0.f, 1.f, 0.f);
+	ChangeDirection(FVector(0.f, 1.f, 0.f));
+}
+
+void ASnake::ChangeDirection(FVector NextDirection)
+{
+	if (FVector::DotProduct(NextDirection, CurrentDirection) != -1.f)
+	{
+		CurrentDirection = NextDirection;
+		HeadStartRotation = GetActorRotation();
+		HeadEndRotation = CurrentDirection.Rotation();
+		ElapsedRotationTime = 0;
+	}
+}
+
+void ASnake::SetReady()
+{
+	bIsRespawning = false;
+	GetWorld()->GetFirstPlayerController()->Possess(this);
+}
+
+void ASnake::Respawn()
+{
+	if (bIsRespawning)
+	{
+		return;
+	}
+
+	bIsRespawning = true;
+
+	//Play Death animation
+
+	CurrentDirection = FVector(0.f);
+	GetWorld()->GetFirstPlayerController()->UnPossess();
+
+	//For now we just wait for next frame and broadcast respawn signal
+	GetWorldTimerManager().SetTimerForNextTick(this, &ASnake::SendRespawnSignal);
+}
+
+void ASnake::SendRespawnSignal()
+{
+	UE_LOG(LogTemp, Display, TEXT("ASnake::SendRespawnSignal"));
+	OnRespawn.Broadcast();
 }

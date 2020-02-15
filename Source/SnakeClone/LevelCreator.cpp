@@ -12,12 +12,16 @@ ALevelCreator::ALevelCreator()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	LevelLayoutInfo.Add(TEXT("w,w,w,w,w,w,w,w,w"));
-	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,s,_,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,w,w,w,w,w,w,w,w"));
+	LevelLayoutInfo.Add(TEXT("w,w,w,w,w,w,w,w,w,w,w,w,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,s,_,_,_,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,w,w,w,w,w,w,w,w,w,w,w,w"));
 }
 
 // Called when the game starts or when spawned
@@ -25,9 +29,9 @@ void ALevelCreator::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!FloorTile)
+	if (!FloorTileBP)
 	{
-		UE_LOG(LogTemp, Display, TEXT("FloorTile not set in the Details panel"));
+		UE_LOG(LogTemp, Display, TEXT("FloorTileBlueprint not set"));
 		return;
 	}
 
@@ -44,30 +48,51 @@ void ALevelCreator::BeginPlay()
 
 	for (int i = 0; i < LevelLayoutInfo.Num(); i++)
 	{
-		SpawnedRows.Add(FLevelRowStruct());
+		TileLocation.X = (LevelLayoutInfo.Num() - 1 - i) * TileSize;
 
 		TArray<FString> RowLayoutInfo;
 		LevelLayoutInfo[i].ParseIntoArray(RowLayoutInfo, TEXT(","), true);
 
-		TileLocation.X = (LevelLayoutInfo.Num() - 1 - i) * Spacing;
-
 		for (int j = 0; j < RowLayoutInfo.Num(); j++)
 		{
-			TileLocation.Y = j * Spacing;
-			AFloorTile* SpawnedTile = World->SpawnActor<AFloorTile>(FloorTile, TileLocation, TileRotation, SpawnParams);
-			SpawnedRows[i].Columns.Add(SpawnedTile);
+			TileLocation.Y = j * TileSize;
+
+			AFloorTile* SpawnedTile = World->SpawnActor<AFloorTile>(FloorTileBP, TileLocation, TileRotation, SpawnParams);
 
 			FString LayoutInfoChar = RowLayoutInfo[j];
 			LayoutInfoChar.TrimStartAndEndInline();
-			if (LevelPiece.Contains(LayoutInfoChar))
+			if (LevelPieceBP.Contains(LayoutInfoChar))
 			{
-				TSubclassOf<ALevelPiece> PieceToSpawn = LevelPiece[LayoutInfoChar];
+				TSubclassOf<ALevelPiece> PieceToSpawn = LevelPieceBP[LayoutInfoChar];
 				World->SpawnActor<ALevelPiece>(PieceToSpawn, TileLocation, TileRotation, SpawnParams);
 			}
 			else if (LayoutInfoChar.Equals(TEXT("s")))
 			{
-				World->SpawnActor<ASnake>(Player, TileLocation, TileRotation, SpawnParams);
+				StartPlayerPosition = TileLocation;
+				SpawnedPlayer = World->SpawnActor<ASnake>(PlayerBP, TileLocation, TileRotation, SpawnParams);
+				SpawnedPlayer->OnRespawn.AddDynamic(this, &ALevelCreator::RespawnPlayer);
 			}
 		}
 	}
+
+	SpawnedPlayer->SetReady();
+}
+
+void ALevelCreator::EndPlay(EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (SpawnedPlayer)
+	{
+		SpawnedPlayer->OnRespawn.RemoveDynamic(this, &ALevelCreator::RespawnPlayer);
+	}
+}
+
+void ALevelCreator::RespawnPlayer()
+{
+	UE_LOG(LogTemp, Display, TEXT("ALevelCreator::RespawnPlayer"));
+	//Reset level state
+	//Reset player state(size, keys, etc...)
+	SpawnedPlayer->SetActorLocationAndRotation(StartPlayerPosition, FRotator(0.f));
+	SpawnedPlayer->SetReady();
 }

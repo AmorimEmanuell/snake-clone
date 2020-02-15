@@ -14,7 +14,6 @@ class SNAKECLONE_API AWall : public ALevelPiece
 {
 	GENERATED_BODY()
 
-public:
-	// Sets default values for this actor's properties
-	AWall();
+private:
+	virtual void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor) override;
 };

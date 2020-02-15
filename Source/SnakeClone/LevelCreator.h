@@ -13,39 +13,37 @@ class SNAKECLONE_API ALevelCreator : public AActor
 
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
-	TMap<FString, TSubclassOf<class ALevelPiece>> LevelPiece;
+	TMap<FString, TSubclassOf<class ALevelPiece>> LevelPieceBP;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
-	TSubclassOf<class AFloorTile> FloorTile;
+	TSubclassOf<class AFloorTile> FloorTileBP;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
-	TSubclassOf<class ASnake> Player;
+	TSubclassOf<class ASnake> PlayerBP;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
-	float Spacing;
+	float TileSize;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
-	float HeightOffset;
+	float SpaceBetweenTiles;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
+	UPROPERTY()
 	TArray<FString> LevelLayoutInfo;
 
-	TArray<FLevelRowStruct> SpawnedRows;
+	UPROPERTY()
+	ASnake* SpawnedPlayer;
+
+	UPROPERTY()
+	FVector StartPlayerPosition;
 
 public:
-	// Sets default values for this actor's properties
 	ALevelCreator();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-};
+	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 
-USTRUCT()
-struct FLevelRowStruct
-{
-	GENERATED_BODY()
-
-	UPROPERTY()
-	TArray<AFloorTile*> Columns;
+private:
+	UFUNCTION()
+	void RespawnPlayer();
 };

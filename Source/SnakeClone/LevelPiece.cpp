@@ -11,5 +11,23 @@ ALevelPiece::ALevelPiece()
 	PrimaryActorTick.bCanEverTick = true;
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
+	StaticMesh->SetCollisionProfileName(TEXT("Trigger"));
 	RootComponent = StaticMesh;
+
+	OnActorBeginOverlap.AddDynamic(this, &ALevelPiece::OnOverlapBegin);
+	OnActorEndOverlap.AddDynamic(this, &ALevelPiece::OnOverlapEnd);
+}
+
+ALevelPiece::~ALevelPiece()
+{
+	OnActorBeginOverlap.RemoveDynamic(this, &ALevelPiece::OnOverlapBegin);
+	OnActorEndOverlap.RemoveDynamic(this, &ALevelPiece::OnOverlapEnd);
+}
+
+void ALevelPiece::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
+{
+}
+
+void ALevelPiece::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
+{
 }

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Collectable.h"
+#include "LevelPiece.h"
 #include "Collectable_Egg.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SNAKECLONE_API ACollectable_Egg : public ACollectable
+class SNAKECLONE_API ACollectable_Egg : public ALevelPiece
 {
 	GENERATED_BODY()
 	

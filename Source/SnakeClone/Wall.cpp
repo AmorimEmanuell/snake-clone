@@ -3,9 +3,14 @@
 
 #include "Wall.h"
 #include "Components/StaticMeshComponent.h"
+#include "Snake.h"
 
-// Sets default values
-AWall::AWall()
+void AWall::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
 {
-	StaticMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+    if (OtherActor->ActorHasTag(TEXT("SnakeHead")))
+    {
+        UE_LOG(LogTemp, Display, TEXT("Wall::OnOverlapBegin"));
+        ASnake* Player = Cast<ASnake>(OtherActor);
+        Player->Respawn();
+    }
 }

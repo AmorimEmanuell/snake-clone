@@ -16,6 +16,13 @@ protected:
 	class UStaticMeshComponent* StaticMesh;
 
 public:
-	// Sets default values for this actor's properties
 	ALevelPiece();
+	~ALevelPiece();
+
+protected:
+	UFUNCTION()
+	virtual void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
+
+	UFUNCTION()
+	virtual void OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
 };

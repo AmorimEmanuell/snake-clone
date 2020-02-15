@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "Snake.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSnakeRespawnEvent);
+
 UCLASS()
 class SNAKECLONE_API ASnake : public APawn
 {
@@ -13,32 +15,52 @@ class SNAKECLONE_API ASnake : public APawn
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class USnakeMovementComponent* MovementComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* StaticMesh;
 
-	FVector MovementDirection = FVector(0.f);
+	UPROPERTY()
+	FVector CurrentDirection = FVector(0.f);
+
+	UPROPERTY()
+	FRotator HeadStartRotation;
+
+	UPROPERTY()
+	FRotator HeadEndRotation;
+
+	UPROPERTY()
+	float ElapsedRotationTime;
+
+	UPROPERTY()
+	bool bIsRespawning;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HeadRotationDuration = .5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Speed = 200.f;
+
+	FSnakeRespawnEvent OnRespawn;
 
 public:
 	// Sets default values for this pawn's properties
 	ASnake();
+
+private:
+	void ChangeDirection(FVector InputVector);
+	void SendRespawnSignal();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	virtual UPawnMovementComponent* GetMovementComponent() const override;
 
 	void MoveUp();
 	void MoveDown();
 	void MoveLeft();
 	void MoveRight();
+	void Respawn();
+	void SetReady();
 };
