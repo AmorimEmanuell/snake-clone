@@ -13,13 +13,20 @@ ALevelPiece::ALevelPiece()
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	StaticMesh->SetCollisionProfileName(TEXT("Trigger"));
 	RootComponent = StaticMesh;
+}
+
+void ALevelPiece::BeginPlay()
+{
+	Super::BeginPlay();
 
 	OnActorBeginOverlap.AddDynamic(this, &ALevelPiece::OnOverlapBegin);
 	OnActorEndOverlap.AddDynamic(this, &ALevelPiece::OnOverlapEnd);
 }
 
-ALevelPiece::~ALevelPiece()
+void ALevelPiece::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
+	Super::EndPlay(EndPlayReason);
+
 	OnActorBeginOverlap.RemoveDynamic(this, &ALevelPiece::OnOverlapBegin);
 	OnActorEndOverlap.RemoveDynamic(this, &ALevelPiece::OnOverlapEnd);
 }

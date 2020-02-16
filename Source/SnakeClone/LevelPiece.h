@@ -17,9 +17,11 @@ protected:
 
 public:
 	ALevelPiece();
-	~ALevelPiece();
 
 protected:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
+
 	UFUNCTION()
 	virtual void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
 

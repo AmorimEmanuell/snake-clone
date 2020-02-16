@@ -43,7 +43,7 @@ FRotator USnakeMovementComponent::GetRotationForThisFrame(float DeltaTime)
 	}
 
 	ElapsedRotationTime += DeltaTime;
-	float RotationProgress = ElapsedRotationTime / TotalRotationTime;
+	float RotationProgress = FMath::Clamp(ElapsedRotationTime / TotalRotationTime, 0.f, 1.f);
 
 	return FMath::Lerp(StartHeadRotation, CurrentInputVector.Rotation(), RotationProgress);
 }
