@@ -13,5 +13,4 @@ UCLASS()
 class SNAKECLONE_API ASnakeCloneGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
 };
