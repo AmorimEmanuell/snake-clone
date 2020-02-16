@@ -3,14 +3,13 @@
 
 #include "Wall.h"
 #include "Components/StaticMeshComponent.h"
-#include "Snake.h"
+#include "SnakeHead.h"
 
 void AWall::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
 {
-    if (OtherActor->ActorHasTag(TEXT("SnakeHead")))
-    {
-        UE_LOG(LogTemp, Display, TEXT("Wall::OnOverlapBegin"));
-        ASnake* Player = Cast<ASnake>(OtherActor);
-        Player->Respawn();
-    }
+	if (OtherActor->ActorHasTag(TEXT("SnakeHead")))
+	{
+		ASnakeHead* Player = Cast<ASnakeHead>(OtherActor);
+		Player->Respawn();
+	}
 }

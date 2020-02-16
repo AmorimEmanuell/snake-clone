@@ -3,7 +3,7 @@
 
 #include "LevelCreator.h"
 #include "FloorTile.h"
-#include "Snake.h"
+#include "SnakeHead.h"
 #include "Engine/World.h"
 
 // Sets default values
@@ -69,7 +69,7 @@ void ALevelCreator::BeginPlay()
 			else if (LayoutInfoChar.Equals(TEXT("s")))
 			{
 				StartPlayerPosition = TileLocation;
-				SpawnedPlayer = World->SpawnActor<ASnake>(PlayerBP, TileLocation, TileRotation, SpawnParams);
+				SpawnedPlayer = World->SpawnActor<ASnakeHead>(PlayerBP, TileLocation, TileRotation, SpawnParams);
 				SpawnedPlayer->OnRespawn.AddDynamic(this, &ALevelCreator::RespawnPlayer);
 			}
 		}

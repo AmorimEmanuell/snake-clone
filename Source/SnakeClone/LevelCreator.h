@@ -19,7 +19,7 @@ private:
 	TSubclassOf<class AFloorTile> FloorTileBP;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
-	TSubclassOf<class ASnake> PlayerBP;
+	TSubclassOf<class ASnakeHead> PlayerBP;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAcess = "true"))
 	float TileSize;
@@ -31,7 +31,7 @@ private:
 	TArray<FString> LevelLayoutInfo;
 
 	UPROPERTY()
-	ASnake* SpawnedPlayer;
+	ASnakeHead* SpawnedPlayer;
 
 	UPROPERTY()
 	FVector StartPlayerPosition;
