@@ -16,7 +16,7 @@ ALevelCreator::ALevelCreator()
 	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
 	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
 	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,e,_,_,_,_,_,w"));
 	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
 	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
 	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));

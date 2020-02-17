@@ -23,9 +23,12 @@ private:
 	UPROPERTY()
 	bool bIsRespawning;
 
+	UPROPERTY()
+	AActor* LastBodyPart;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Speed = 200.f;
+	TSubclassOf<class ASnakeBodyPart> SnakeBodyPartBP;
 
 	FSnakeRespawnEvent OnRespawn;
 
@@ -47,6 +50,8 @@ public:
 	void MoveDown();
 	void MoveLeft();
 	void MoveRight();
+
+	void IncreaseSize();
 	void Respawn();
 	void SetReady();
 };

@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "TimerManager.h"
+#include "SnakeBodyPart.h"
 #include "SnakeMovementComponent.h"
 
 // Sets default values
@@ -21,6 +22,8 @@ ASnakeHead::ASnakeHead()
 
 	MovementComponent = CreateDefaultSubobject<USnakeMovementComponent>(TEXT("MovementComponent"));
 	MovementComponent->SetUpdatedComponent(RootComponent);
+
+	LastBodyPart = this;
 }
 
 // Called when the game starts or when spawned
@@ -79,6 +82,24 @@ void ASnakeHead::SetReady()
 	GetWorld()->GetFirstPlayerController()->Possess(this);
 }
 
+void ASnakeHead::IncreaseSize()
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ASnakeHead::IncreaseSize(Unable to find world instance)"));
+		return;
+	}
+
+	FActorSpawnParameters SpawnParams;
+	FVector LastPartLocation = LastBodyPart->GetActorLocation();
+	FRotator LastPartRotation = LastBodyPart->GetActorRotation();
+
+	ASnakeBodyPart* BodyPart = World->SpawnActor<ASnakeBodyPart>(SnakeBodyPartBP, LastPartLocation, LastPartRotation, SpawnParams);
+	BodyPart->SetBodyPartToFollow(LastBodyPart);
+	LastBodyPart = BodyPart;
+}
+
 void ASnakeHead::Respawn()
 {
 	if (bIsRespawning)
@@ -91,8 +112,7 @@ void ASnakeHead::Respawn()
 	MovementComponent->Reset();
 	GetWorld()->GetFirstPlayerController()->UnPossess();
 
-	//Play Death animation
-	//For now we just wait for next frame and broadcast respawn signal
+	//Play defeat animation
 	GetWorldTimerManager().SetTimerForNextTick(this, &ASnakeHead::DispatchRespawnEvent);
 }
 

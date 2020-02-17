@@ -2,14 +2,21 @@
 
 
 #include "Collectable_Egg.h"
+#include "SnakeHead.h"
+#include "Components/StaticMeshComponent.h"
 
 void ACollectable_Egg::OnOverlapBegin(AActor* OverlapedActor, AActor* OtherActor)
 {
 	if (OtherActor->ActorHasTag(TEXT("SnakeHead")))
 	{
 		UE_LOG(LogTemp, Display, TEXT("ACollectable_Egg::OnOverlapBegin"));
-		//Disable any collision.
-		//Increase the Snake size.
+
+		StaticMesh->SetGenerateOverlapEvents(false);
+
+		ASnakeHead* SnakeHead = Cast<ASnakeHead>(OtherActor);
+		SnakeHead->IncreaseSize();
+
 		//Play collecting animation.
+		Destroy();
 	}
 }
