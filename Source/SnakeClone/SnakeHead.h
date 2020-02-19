@@ -4,33 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "SnakePart.h"
 #include "SnakeHead.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSnakeRespawnEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSnakeHeadOnRespawn);
 
 UCLASS()
-class SNAKECLONE_API ASnakeHead : public APawn
+class SNAKECLONE_API ASnakeHead : public ASnakePart
 {
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class USnakeMovementComponent* MovementComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* StaticMesh;
-
 	UPROPERTY()
 	bool bIsRespawning;
 
 	UPROPERTY()
-	AActor* LastBodyPart;
+	class ASnakePart *LastSnakePart;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class ASnakeBodyPart> SnakeBodyPartBP;
+	TSubclassOf<class ASnakeBody> SnakeBodyBP;
 
-	FSnakeRespawnEvent OnRespawn;
+	FSnakeHeadOnRespawn OnRespawn;
 
 public:
 	ASnakeHead();
@@ -40,16 +35,10 @@ private:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual FVector GetVelocityForThisFrame(float DeltaTime) override;
 
 public:
-	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual UPawnMovementComponent* GetMovementComponent() const override;
-
-	void MoveUp();
-	void MoveDown();
-	void MoveLeft();
-	void MoveRight();
+	void TryChangeDirection(FVector ToDirection);
 
 	void IncreaseSize();
 	void Respawn();

@@ -1,90 +1,59 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "SnakeHead.h"
-#include "Components/InputComponent.h"
+#include "TimerManager.h"
+#include "SnakeBody.h"
+#include "SnakePawn.h"
+#include "SnakeMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/PlayerController.h"
-#include "TimerManager.h"
-#include "SnakeBodyPart.h"
-#include "SnakeMovementComponent.h"
 
-// Sets default values
 ASnakeHead::ASnakeHead()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add(TEXT("SnakeHead"));
-
-	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Head"));
-	StaticMesh->SetCollisionProfileName(TEXT("Pawn"));
-	RootComponent = StaticMesh;
-
-	MovementComponent = CreateDefaultSubobject<USnakeMovementComponent>(TEXT("MovementComponent"));
-	MovementComponent->SetUpdatedComponent(RootComponent);
-
-	LastBodyPart = this;
+	bIsLastPart = true;
 }
 
-// Called when the game starts or when spawned
 void ASnakeHead::BeginPlay()
 {
 	Super::BeginPlay();
+
+	LastSnakePart = this;
 }
 
-// Called every frame
-void ASnakeHead::Tick(float DeltaTime)
+FVector ASnakeHead::GetVelocityForThisFrame(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	return CurrentDirection * MoveSpeed * DeltaTime;
 }
 
-// Called to bind functionality to input
-void ASnakeHead::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ASnakeHead::TryChangeDirection(FVector ToDirection)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	if (FVector::DotProduct(CurrentDirection, ToDirection) == -1.f || IsRotating())
+	{
+		return;
+	}
 
-	check(PlayerInputComponent);
+	if (CurrentDirection != ToDirection)
+	{
+		AddPositionToHistory(GetActorLocation());
 
-	PlayerInputComponent->BindAction(TEXT("MoveUp"), IE_Pressed, this, &ASnakeHead::MoveUp);
-	PlayerInputComponent->BindAction(TEXT("MoveDown"), IE_Pressed, this, &ASnakeHead::MoveDown);
-	PlayerInputComponent->BindAction(TEXT("MoveLeft"), IE_Pressed, this, &ASnakeHead::MoveLeft);
-	PlayerInputComponent->BindAction(TEXT("MoveRight"), IE_Pressed, this, &ASnakeHead::MoveRight);
-}
+		CurrentDirection = ToDirection;
 
-UPawnMovementComponent* ASnakeHead::GetMovementComponent() const
-{
-	return MovementComponent;
-}
-
-void ASnakeHead::MoveUp()
-{
-	MovementComponent->AddInputVector(FVector(1.f, 0.f, 0.f));
-}
-
-void ASnakeHead::MoveDown()
-{
-	MovementComponent->AddInputVector(FVector(-1.f, 0.f, 0.f));
-}
-
-void ASnakeHead::MoveLeft()
-{
-	MovementComponent->AddInputVector(FVector(0.f, -1.f, 0.f));
-}
-
-void ASnakeHead::MoveRight()
-{
-	MovementComponent->AddInputVector(FVector(0.f, 1.f, 0.f));
+		ElapsedRotationTime = 0.f;
+		StartRotation = GetActorRotation();
+	}
 }
 
 void ASnakeHead::SetReady()
 {
 	bIsRespawning = false;
-	GetWorld()->GetFirstPlayerController()->Possess(this);
+	ASnakePawn* SnakePawn = Cast<ASnakePawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	SnakePawn->SetControlledHead(this);
 }
 
 void ASnakeHead::IncreaseSize()
 {
-	UWorld* World = GetWorld();
+	UWorld *World = GetWorld();
 	if (!World)
 	{
 		UE_LOG(LogTemp, Error, TEXT("ASnakeHead::IncreaseSize(Unable to find world instance)"));
@@ -92,12 +61,12 @@ void ASnakeHead::IncreaseSize()
 	}
 
 	FActorSpawnParameters SpawnParams;
-	FVector LastPartLocation = LastBodyPart->GetActorLocation();
-	FRotator LastPartRotation = LastBodyPart->GetActorRotation();
+	FVector LastPartLocation = LastSnakePart->GetActorLocation();
+	FRotator LastPartRotation = LastSnakePart->GetActorRotation();
 
-	ASnakeBodyPart* BodyPart = World->SpawnActor<ASnakeBodyPart>(SnakeBodyPartBP, LastPartLocation, LastPartRotation, SpawnParams);
-	BodyPart->SetBodyPartToFollow(LastBodyPart);
-	LastBodyPart = BodyPart;
+	ASnakeBody *BodyPart = World->SpawnActor<ASnakeBody>(SnakeBodyBP, LastPartLocation, LastPartRotation, SpawnParams);
+	BodyPart->RegisterPartToFollow(LastSnakePart);
+	LastSnakePart = BodyPart;
 }
 
 void ASnakeHead::Respawn()
@@ -109,8 +78,12 @@ void ASnakeHead::Respawn()
 
 	bIsRespawning = true;
 
-	MovementComponent->Reset();
-	GetWorld()->GetFirstPlayerController()->UnPossess();
+	CurrentDirection = FVector(0.f);
+	ElapsedRotationTime = RotationTime;
+	MoveHistory.Empty();
+
+	ASnakePawn* SnakePawn = Cast<ASnakePawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	SnakePawn->RemoveControlledHead();
 
 	//Play defeat animation
 	GetWorldTimerManager().SetTimerForNextTick(this, &ASnakeHead::DispatchRespawnEvent);
