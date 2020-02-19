@@ -4,10 +4,8 @@
 #include "LevelPiece.h"
 #include "Components/StaticMeshComponent.h"
 
-// Sets default values
 ALevelPiece::ALevelPiece()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
@@ -31,10 +29,10 @@ void ALevelPiece::EndPlay(EEndPlayReason::Type EndPlayReason)
 	OnActorEndOverlap.RemoveDynamic(this, &ALevelPiece::OnOverlapEnd);
 }
 
-void ALevelPiece::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
+void ALevelPiece::OnOverlapBegin(AActor *OverlappedActor, AActor *OtherActor)
 {
 }
 
-void ALevelPiece::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
+void ALevelPiece::OnOverlapEnd(AActor *OverlappedActor, AActor *OtherActor)
 {
 }

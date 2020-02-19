@@ -1,24 +1,25 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "LevelCreator.h"
 #include "FloorTile.h"
 #include "SnakeHead.h"
 #include "Engine/World.h"
+#include "GameFramework/GameModeBase.h"
+#include "SnakePawn.h"
 
 // Sets default values
 ALevelCreator::ALevelCreator()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	LevelLayoutInfo.Add(TEXT("w,w,w,w,w,w,w,w,w,w,w,w,w"));
 	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
 	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,e,_,_,_,_,_,_,_,_,_,w"));
 	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,e,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
-	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,_,_,w,w,w,w,w,w,_,_,_,w"));
+	LevelLayoutInfo.Add(TEXT("w,e,_,_,_,_,_,_,_,_,_,_,w"));
 	LevelLayoutInfo.Add(TEXT("w,_,_,_,_,_,_,_,_,_,_,_,w"));
 	LevelLayoutInfo.Add(TEXT("w,s,_,_,_,_,_,_,_,_,_,_,w"));
 	LevelLayoutInfo.Add(TEXT("w,w,w,w,w,w,w,w,w,w,w,w,w"));
@@ -35,7 +36,7 @@ void ALevelCreator::BeginPlay()
 		return;
 	}
 
-	UWorld* World = GetWorld();
+	UWorld *World = GetWorld();
 	if (!World)
 	{
 		UE_LOG(LogTemp, Display, TEXT("World doesn't exist"));
@@ -57,7 +58,7 @@ void ALevelCreator::BeginPlay()
 		{
 			TileLocation.Y = j * TileSize;
 
-			AFloorTile* SpawnedTile = World->SpawnActor<AFloorTile>(FloorTileBP, TileLocation, TileRotation, SpawnParams);
+			AFloorTile *SpawnedTile = World->SpawnActor<AFloorTile>(FloorTileBP, TileLocation, TileRotation, SpawnParams);
 
 			FString LayoutInfoChar = RowLayoutInfo[j];
 			LayoutInfoChar.TrimStartAndEndInline();
@@ -75,7 +76,8 @@ void ALevelCreator::BeginPlay()
 		}
 	}
 
-	SpawnedPlayer->SetReady();
+	ASnakePawn* SnakePawn = Cast<ASnakePawn>(World->GetFirstPlayerController()->GetPawn());
+	SnakePawn->SetControlledHead(SpawnedPlayer);
 }
 
 void ALevelCreator::EndPlay(EEndPlayReason::Type EndPlayReason)
